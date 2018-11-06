@@ -158,10 +158,12 @@ function threeInit()
 */
 function shaderLoad()
 {
+    let url = location.href;
+
     // vert
     let vertContent;
     let vertObj = new XMLHttpRequest();
-    vertObj.open('get', '../_shader/main.vert', true);
+    vertObj.open('get', url + '/_shader/main.vert', true);
     vertObj.onreadystatechange = processResultVert;
     function processResultVert()
     {
@@ -181,7 +183,7 @@ function shaderLoad()
     // frag
     let fragContent;
     let fragObj = new XMLHttpRequest();
-    fragObj.open('get', '../_shader/main.frag', true);
+    fragObj.open('get', url + '/_shader/main.frag', true);
     fragObj.onreadystatechange = processResultFrag;
     function processResultFrag()
     {

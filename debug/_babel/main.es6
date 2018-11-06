@@ -1,9 +1,6 @@
 let GlslParam = function()
 {
-    this.w = 1334;
-    this.h = 750;
-    this.boxRotationX = 0.5;
-    this.boxRotationY = 0.5;
+    this.timeSpeed = 1000;
     this.isDebug = true;
 };
 let _glslParam;
@@ -16,10 +13,27 @@ let _threeRenderer;
 let _cvs;
 let _cvsWrap;
 
+let _isShaderLoaded = false;
+let _uniforms = {
+    u_resolution: {
+        type: "vec2",
+        value: new THREE.Vector2()
+    },
+    u_mouse: {
+        type: "vec2",
+        value: new THREE.Vector2()
+    },
+    u_time: {
+        type: "f",
+        value: new Number()
+    }
+};
+let _mousePos = { x: 0, y: 0 };
+let _startTime = 0;
+
 /* 
     threejs geometry
 */
-let _box;
 let _screen;
 
 
@@ -29,7 +43,8 @@ let _screen;
 document.addEventListener("DOMContentLoaded", awake);
 function awake()
 {
-
+    //
+    _startTime = Date.now();
 }
 
 
@@ -52,17 +67,23 @@ function start()
 
     //
     window.addEventListener("resize", resize);
+    window.addEventListener('mousemove', mouseMove);
+
+    //
+    update();
 }
 
 
 /* 
-    window resized
+    update
 */
-function resize()
+function update()
 {
-    cvsSizing();
-    
-    threeResizing();
+    //
+    reloadUniforms();
+
+    //
+    window.requestAnimationFrame(update);
 }
 
 
@@ -85,27 +106,9 @@ function datInit()
 {
     _glslParam = new GlslParam();
     _glslParamGUI = new dat.GUI();
-    _glslParamGUI.add(_glslParam, 'w', 0, 1920).onChange(() =>
-    {
-
-    });
-    _glslParamGUI.add(_glslParam, 'h', 0, 1080).onChange(() =>
-    {
-
-    });
-    _glslParamGUI.add(_glslParam, 'boxRotationX', 0, 5).onChange(() =>
-    {
-        _box.rotation.x = _glslParam.boxRotationX;
-        _threeRenderer.render(_threeScene, _threeCamera);
-    });
-    _glslParamGUI.add(_glslParam, 'boxRotationY', 0, 5).onChange(() =>
-    {
-        _box.rotation.y = _glslParam.boxRotationY;
-        _threeRenderer.render(_threeScene, _threeCamera);
-    });
+    _glslParamGUI.add(_glslParam, 'timeSpeed', 10, 2000);
     _glslParamGUI.add(_glslParam, 'isDebug').onChange(() =>
     {
-        console.log("param sw : ", _glslParam.isDebug);
         
     });
 }
@@ -142,59 +145,106 @@ function threeInit()
     ambientLight.position.set(0, 1, 0);
     _threeScene.add(ambientLight);
 
-    // ---
-    // make object
-    let geometry;
-    let material;
+    //
+    shaderLoad();
 
-    // box
-    geometry = new THREE.BoxGeometry(100, 100, 100);
-    material = new THREE.MeshStandardMaterial({color: 0x0000FF, ambient: 0xFF00FF});
-    _box = new THREE.Mesh(geometry, material);
-    // _threeScene.add(_box);
+    // 初回実行
+    _threeRenderer.render(_threeScene, _threeCamera);
+}
 
-    // screen
-    geometry = new THREE.PlaneGeometry(120, 120, 32);
-    let uniforms = {
-        u_resolution: {
-            type: "vec2",
-            value: new THREE.Vector2(_cvs.style.width, _cvs.style.height)
-        },
-        u_mouse: {
-            type: "vec2",
-            value: new THREE.Vector2()
-        },
-        u_time: {
-            type: "f",
-            value: new Number()
-        }
-    }
-    material = new THREE.MeshStandardMaterial({color: 0xFFFF00, side: THREE.DoubleSide});
-    let httpObj = new XMLHttpRequest();
-    httpObj.open('get', '../_shader/main.vert', true);
-    httpObj.onreadystatechange = processResult;
-    function processResult()
+
+/* 
+    shader load
+*/
+function shaderLoad()
+{
+    // vert
+    let vertContent;
+    let vertObj = new XMLHttpRequest();
+    vertObj.open('get', '../_shader/main.vert', true);
+    vertObj.onreadystatechange = processResultVert;
+    function processResultVert()
     {
-        if(httpObj.readyState == 4) {
-            if(httpObj.status == 200 || httpObj.status == 201) {
+        if(vertObj.readyState == 4) {
+            if(vertObj.status == 200 || vertObj.status == 201) {
                 // リクエストの処理
-                console.log('heloo');
-                console.log('getget : ', this.responseText);
+                vertContent = this.responseText;
+                console.log('vert : ', vertContent);
+                shaderLoaded();
             } else {
                 // エラー処理
             }
         }
     };
-    httpObj.send(null);
-    // material = new THREE.ShaderMaterial({
-    //     vertexShader: document.getElementById("vs").textContent,
-    //     fragmentShader: document.getElementById("fs").textContent,
-    //     uniforms: uniforms
-    // });
-    _screen = new THREE.Mesh(geometry, material);
-    _threeScene.add(_screen);
+    vertObj.send(null);
+    
+    // frag
+    let fragContent;
+    let fragObj = new XMLHttpRequest();
+    fragObj.open('get', '../_shader/main.frag', true);
+    fragObj.onreadystatechange = processResultFrag;
+    function processResultFrag()
+    {
+        if(fragObj.readyState == 4) {
+            if(fragObj.status == 200 || fragObj.status == 201) {
+                // リクエストの処理
+                fragContent = this.responseText;
+                console.log('frag : ', fragContent);
+                shaderLoaded();
+            } else {
+                // エラー処理
+            }
+        }
+    };
+    fragObj.send(null);
+    
+    
+    function shaderLoaded()
+    {
+        if(vertContent == null || fragContent == null) return;
 
-    // 初回実行
+        console.log('shader load comp;');
+        
+
+        _isShaderLoaded = true;
+        
+        // make screen
+        let geometry = new THREE.PlaneGeometry(1200, 1200, 32);
+        let material = new THREE.ShaderMaterial({
+            vertexShader: vertContent,
+            fragmentShader: fragContent,
+            // vertexShader: document.getElementById("vs").textContent,
+            // fragmentShader: document.getElementById("fs").textContent,
+            uniforms: _uniforms
+        });
+
+        _screen = new THREE.Mesh(geometry, material);
+        _threeScene.add(_screen);
+
+        threeResizing();
+    
+        _threeRenderer.render(_threeScene, _threeCamera);
+    }
+}
+
+
+/* 
+    reload uniforms
+*/
+function reloadUniforms()
+{
+    if(!_isShaderLoaded) return;
+
+    // console.log('reload uniforms');
+
+    // mouse position
+    _uniforms.u_mouse.value = new THREE.Vector2(_mousePos.x, _mousePos.y);
+        
+    // time
+    let elapsedMilliseconds = Date.now() - _startTime;
+    let elapsedSeconds = elapsedMilliseconds / _glslParam.timeSpeed;
+    _uniforms.u_time.value = elapsedSeconds;
+    
     _threeRenderer.render(_threeScene, _threeCamera);
 }
 
@@ -209,6 +259,9 @@ function threeResizing()
     let w = window.innerWidth;
     let h = window.innerHeight;
 
+    // resolution
+    _uniforms.u_resolution.value = new THREE.Vector2(w, h);
+
     _threeRenderer.setPixelRatio(window.devicePixelRatio);
     _threeRenderer.setSize(w, h);
 
@@ -216,4 +269,28 @@ function threeResizing()
     _threeCamera.updateProjectionMatrix();
 
     _threeRenderer.render(_threeScene, _threeCamera);
+}
+
+
+
+// --- event --- //
+
+/* 
+    window resized
+*/
+function resize()
+{
+    cvsSizing();
+    
+    threeResizing();
+}
+
+
+/* 
+    mosue move
+*/
+function mouseMove(e)
+{
+	e = event || window.event;	
+	_mousePos = { x: e.clientX, y: e.clientY };
 }

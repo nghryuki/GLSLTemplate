@@ -104,6 +104,8 @@ gulp.task("default", ["server"], function()
     gulp.watch("./debug/_styl/**/*.styl", ["styl"]);
     gulp.watch("./debug/_babel/**/*.es6", ["babel"]);
     gulp.watch("./debug/_ejs/**/*.ejs", ["ejs"]);
+    gulp.watch("./debug/_shader/**/*.vert", ["babel"]);
+    gulp.watch("./debug/_shader/**/*.frag", ["babel"]);
 
     // sp
     gulp.watch("./debug/sp/_styl/**/*.styl", ["styl_sp"]);

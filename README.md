@@ -3,6 +3,9 @@
 
 ## TODO
 - shader読み込み箇所をクラス化する
+- loaderのerror処理
+- SP実装
+- ajax実装
 
 
 ## UPDATE

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<%- 
+	include('../_common/_metas', {
+		root: '../',
+		current: 'about/'
+	});
+	%>
+</head>
+<body>
+
+	<%-
+	include('../_common/_header', {
+		path: '../'
+	});
+	%>
+	
+    <main>
+		<p>about</p>
+	</main>
+
+	<% include ../_common/_footer %>
+
+	<script src="../js/main.js"></script>
+</body>
+</html>

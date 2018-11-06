@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>	
+<%- 
+include('../../_ejs/_common/_metas', {
+	path: '../'
+});
+%>	
+<link rel="stylesheet" href="../css/_common/reset.css">
+<link rel="stylesheet" href="./css/_common/header.css">
+<link rel="stylesheet" href="./css/_common/footer.css">
+<link rel="stylesheet" href="./css/main.css">
+<script src="./js/main.js"></script>
+</head>
+<body>
+
+	<%-
+		include('./_common/_header', {
+			path: './'
+		});
+	%>
+	
+	<main>
+		<section id="top">
+			<p>t o p</p>
+		</section>
+		<section id="intro">
+			<article>
+				<h1>HELLO, WORLD</h1>
+				<p>あははははははははは</p>	
+			</article>
+		</section>
+	</main>
+
+	<% include _common/_footer %>
+</body>
+</html>

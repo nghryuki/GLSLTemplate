@@ -1,0 +1,150 @@
+//-----------------------------------------
+// 画像の置き換え
+imgReplacement()
+	//text-indent: 100%;
+	// text-indent: -99999px;
+	// overflow: hidden;
+	// white-space: nowrap;
+
+	// 仕様変更
+	font-size: 1px;
+	line-height: 1px;
+	color: transparent;
+	overflow: hidden;
+
+//-----------------------------------------
+// Retina用に背景画像をセットする
+// @param file		ファイルパス(※拡張子の前まで、@2xは付けない)
+// @param type		拡張子
+// @param width		画像サイズ(非Retina時)
+// @param height	画像サイズ(非Retina)
+setRetinaBgImage( file, type, width, height )
+	background-image: url('@{file}.@{type}');
+	background-repeat: no-repeat;
+
+	@media( -webkit-min-device-pixel-ratio:1.5 ),
+			( min--moz-device-pixel-ratio:1.5 ),
+			( min-device-pixel-ratio:1.5 )
+	{
+		background-image: url('@{file}@2x.@{type}');
+		background-size: width height;
+	}
+
+
+
+//-----------------------------------------
+// フォントをセット
+// .setNormalFont( @fontSize, @lineHeight, @color , @letterSpacing:0.0em ){
+setNormalFont( fontSize, lineHeight, color ){
+
+	font-family: @deviceFont;
+
+	font-size: fontSize;
+	line-height: lineHeight;
+	color: color;
+	//letter-spacing: @letterSpacing;
+}
+
+
+//-----------------------------------------
+// 太いフォントをセット
+// .setBoldFont( @fontSize, @lineHeight, @color, @letterSpacing:0.0em ){
+setBoldFont( fontSize, lineHeight, color ){
+
+	font-family: @boldFont;
+
+	font-size: fontSize;
+	line-height: lineHeight;
+	color: color;
+	//letter-spacing: @letterSpacing;
+}
+
+
+//-----------------------------------------
+// TransformOriginを設定
+setTransformOrigin( left, top ) {
+	-moz-transform-origin:left top;
+	-webkit-transform-origin:left top;
+	transform-origin:left top;
+}
+
+//-----------------------------------------
+// Transformを設定
+setTransform( transform ) {
+	-moz-transform:transform;
+	-webkit-transform:transform;
+	transform:transform;
+}
+
+//-----------------------------------------
+// Transition指定
+setTransition( transition ) {
+	-moz-transition:transition;
+	-webkit-transition:transition;
+	transition:transition;
+}
+
+
+
+//--------------------------------------------
+// UserSelectの設定
+// マウスで選択不可 + イベントを無視できるようになる。
+setIgnoreUserSelect() {
+	-webkit-user-select: none;
+	-ms-user-select:none;
+	-moz-user-select: none;
+	user-select:none;
+
+	// マウスイベントを無視する
+	// IE11～ Safari4～ Firefox3.6～に対応なので注意
+	pointer-events:none;
+}
+
+
+//-----------------------------------------
+// absolute設定のショートカット
+absolute( left, top, z )
+	position: absolute;
+	top: top;
+	left: left;
+	z-index: z;
+
+
+//-----------------------------------------
+// サイズ設定
+size( width, height )
+	width: width;
+	height:height;
+
+
+//-----------------------------------------
+// BoxSizing
+boxSizing( prop )
+	box-sizing: prop;
+	-webkit-box-sizing: prop;
+	-moz-box-sizing: prop;
+
+
+
+
+//-----------------------------------------
+// 共通パーツを格納した画像ディレクトリ
+commonImgDir = "../img/_common/";
+
+
+//-----------------------------------------
+// 色関係
+_red = #ce181e;
+
+
+//-----------------------------------------
+// 基本デバイスフォント設定
+deviceFont = Verdana, Robot, 'Droid Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
+boldFont = Verdana, Robot, 'Droid Sans', 'HiraKakuProN-W6', sans-serif;
+
+
+//-----------------------------------------
+// テキストカラー
+mainTxtColor = #333333;
+subTxtColor = #666666;
+noticeRedColor = #da0010;

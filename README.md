@@ -1,14 +1,11 @@
-# 特性GLSLテンプレート
+# original GLSL template
 
 
-## todo
+## TODO
 - shader読み込み箇所をクラス化する
 
 
-## 更新
+## UPDATE
 
-### 2018/09/19
-- エラー行数をes6で表示
-
-### 2018/06/20
-- less を廃止し stylus を導入
+### 2018/11/07
+- make git directory
